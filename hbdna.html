@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HBD Surprise for You</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+<style>
+/* ================= CSS BASE ================= */
+*{margin:0;padding:0;box-sizing:border-box;font-family: 'Poppins', sans-serif}
+body{background:#f8f1e7; overflow:hidden; width: 100vw; height: 100vh;}
+
+/* หน้า Login */
+#loginScreen{display:flex;justify-content:center;align-items:center;height:100vh; background:#f8f1e7; position:relative; z-index:100;}
+button#loginBtn{
+    padding: 15px 40px; border: none; border-radius: 50px;
+    background: #d2b89c; color: white; font-size: 1.2rem;
+    font-weight: 600; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    transition: 0.3s;
+}
+button#loginBtn:hover{ transform: scale(1.05); background: #bfa588; }
+
+#mainContent{display:none;height:100vh;position:relative; width: 100%;}
+
+/* ================= ENVELOPE ================= */
+.envelope{
+  position:absolute; bottom:-300px; left:50%;
+  transform:translateX(-50%); width: 260px; height: 170px;
+  background:#e0c4a8; border-radius:8px;
+  box-shadow:0 15px 30px rgba(0,0,0,0.25);
+  transition: 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  cursor:pointer; z-index: 2;
+}
+.envelope::before{
+  content:""; position:absolute; width:100%; height:100%;
+  background:linear-gradient(135deg,#d2b89c 50%,transparent 50%),
+             linear-gradient(225deg,#d2b89c 50%,transparent 50%);
+}
+
+/* ================= PAPER (Notebook Style) ================= */
+#notebook-paper{
+  position:absolute; top:50%; left:50%;
+  transform:translate(-50%, -50%) scale(0);
+  width: 90%; max-width: 450px; min-height: 400px;
+  background: white;
+  background-image: linear-gradient(to bottom, transparent 29px, #00b0d7 1px);
+  background-size: 100% 30px;
+  padding: 70px 20px 40px 60px; border-radius: 10px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+  transition: 0.5s cubic-bezier(.34,1.56,.64,1);
+  z-index: 20; line-height: 30px;
+}
+#notebook-paper.show{ transform: translate(-50%, -50%) scale(1); }
+#notebook-paper::before{
+  content:''; position:absolute; top:0; left:45px;
+  height:100%; width:2px; background:#db4034;
+}
+.paper-title{ position:absolute; top:25px; left:60px; font-size: 1.6rem; font-weight: 600; }
+.close-btn{
+  position:absolute; top:15px; right:15px;
+  background:#eee; border:none; width: 35px; height: 35px;
+  border-radius: 50%; font-size: 18px; cursor:pointer;
+}
+
+/* ================= CAKE SECTION ================= */
+#cakeSection{
+  position:absolute; top:-100vh; width:100%; height:100vh;
+  display:flex; flex-direction:column; justify-content:center;
+  align-items:center; transition: 1.2s ease-in-out;
+  background:#333333; z-index:10;
+}
+#cakeSection.show{top:0}
+.cake-text{ margin-bottom: 40px; color:white; text-align:center; padding: 0 20px; }
+
+.cake{ position:relative; width: 200px; height: 160px; }
+.plate{ width:220px; height:90px; position:absolute; bottom:-10px; left:-10px; background:#ccc; border-radius:50%; box-shadow: 0 5px 40px rgba(0,0,0,0.5); }
+.layer{ position:absolute; width:200px; height:80px; border-radius:50%; }
+.layer-top{top:0; background: #6b4a1a;}
+.layer-middle{top:25px; background: #5a3e12;}
+.layer-bottom{top:50px; background: #4a3210;}
+.icing{ top:2px; left:5px; background:#f0e4d0; width:190px; height:70px; border-radius:50%; position:absolute; z-index: 2; }
+.drip{ position:absolute; background:#f0e4d0; border-radius: 20px; z-index: 1;}
+.drip1{ top:40px; left:5px; width:30px; height:40px; }
+.drip2{ top:50px; left:160px; width:30px; height:50px; }
+.drip3{ top:45px; left:70px; width:60px; height:40px; }
+.candle{ background:#7B020B; width:12px; height:40px; position:absolute; top:-15px; left:50%; transform:translateX(-50%); z-index: 3; }
+.flame{
+  position:absolute; background:orange; width:12px; height:25px; border-radius: 50% 50% 20% 20%;
+  top:-22px; left:50%; transform:translateX(-50%); box-shadow: 0 0 20px orange;
+  animation:flicker 0.6s ease-in-out infinite alternate; cursor: pointer;
+}
+@keyframes flicker{ 0%{transform:translateX(-50%) skewX(5deg);} 100%{transform:translateX(-50%) skewX(-5deg);} }
+
+/* ================= AUDIO PLAYER ================= */
+#audioContainer {
+    position: fixed; bottom: 20px; left: 50%;
+    transform: translateX(-50%); z-index: 100;
+    display: none; background: rgba(255, 255, 255, 0.9);
+    padding: 10px 20px; border-radius: 50px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2); align-items: center;
+}
+audio { height: 35px; width: 220px; }
+
+/* Mobile Adjustments */
+@media (max-width: 480px) {
+    .cake { transform: scale(0.85); }
+    #notebook-paper { padding: 60px 15px 30px 50px; font-size: 0.9rem; }
+}
+</style>
+</head>
+<body>
+
+<div id="loginScreen">
+  <button id="loginBtn" onclick="login()">Click here ✨</button>
+</div>
+
+<div id="mainContent">
+  
+  <div id="cakeSection">
+    <div class="cake-text">
+      <h1>Happy Birthday! 🎂</h1>
+      <p style="font-size: 0.9rem; opacity: 0.8; margin-top: 10px;">(Click on the candle to blow a light)</p>
+    </div>
+    <div class="cake">
+      <div class="plate"></div>
+      <div class="layer layer-bottom"></div>
+      <div class="layer layer-middle"></div>
+      <div class="layer layer-top"></div>
+      <div class="icing"></div>
+      <div class="drip drip1"></div>
+      <div class="drip drip2"></div>
+      <div class="drip drip3"></div>
+      <div class="candle">
+        <div class="flame" onclick="blowCandle()"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="envelope" id="envelope" onclick="openEnvelope()"></div>
+
+  <div id="notebook-paper">
+    <button class="close-btn" onclick="closePaper(event)">✕</button>
+    <div class="paper-title">Happy birthday.. 🎈🎉</div>
+    <div id="content">
+      <p>สุขสันต์วันเกิดนะคะ 🎂💖</p>
+      <p>ขอให้ปีนี้เป็นปีที่ดีมาก ๆ ของเธอ เต็มไปด้วยความสุข ความสบายใจ และเรื่องราวดี ๆ ในทุก ๆ วันเลยนะ</p>
+      <p>ขอให้เธอได้เจอแต่สิ่งดี ๆ คนดี ๆ และโอกาสดี ๆ เข้ามาในชีวิตเสมอ</p>
+      <p>ขอให้สุขภาพแข็งแรงมาก ๆ ทั้งกายและใจ ไม่เจ็บไม่ป่วย และไม่เครียดมากเกินไปนะ</p>
+      <p>ขอให้ทุกความฝัน ทุกความตั้งใจ และทุกความปรารถนาของเธอ ค่อย ๆ เป็นจริงในแบบที่สวยงามที่สุด</p>
+      <p>แล้วก็อยากให้เธอรู้ไว้ว่า เธอเป็นเพื่อนที่ดีมาก ๆ สำหรับเราเลยนะ</p>
+      <p>ขอบคุณที่คอยรับฟัง คอยอยู่ข้าง ๆ และเป็นคนที่เรารู้สึกสบายใจทุกครั้งที่ได้คุยด้วย</p>
+      <p>สำหรับเรา เธอเป็นคนที่พิเศษมาก ๆ จริง ๆ 💕</p>
+      <p>สุขสันต์วันเกิดอีกครั้งนะคะ 🎉✨</p>
+      <p style="margin-top: 20px; font-weight: 600;">
+    </div>
+  </div>
+
+  <div id="audioContainer">
+    <audio id="hbdSong" controls loop>
+      <source src="Happy Birthday to YouBirthday Song [Music Box].mp3" type="audio/mpeg">
+      Your browser does not support the audio element.
+    </audio>
+  </div>
+
+</div>
+
+<script>
+let openedOnce = false;
+const song = document.getElementById('hbdSong');
+const audioUI = document.getElementById('audioContainer');
+
+// ฟังก์ชัน Login เพื่อเตรียมความพร้อมของหน้าเว็บ
+function login(){
+  document.getElementById('loginScreen').style.display='none';
+  document.getElementById('mainContent').style.display='block';
+  setTimeout(()=>{
+    document.getElementById('envelope').style.bottom='120px';
+  },300);
+}
+
+// ฟังก์ชันเปิดจดหมาย (ยังไม่มีเพลง)
+function openEnvelope(){
+  document.getElementById('notebook-paper').classList.add('show');
+}
+
+// ฟังก์ชันปิดจดหมาย -> ** เพลงเริ่มเล่นที่นี่ **
+function closePaper(e){
+  if(e) e.stopPropagation();
+  document.getElementById('notebook-paper').classList.remove('show');
+
+  // ถ้าเป็นการปิดครั้งแรก ให้เริ่มเพลงและหน้าเค้ก
+  if(!openedOnce){
+    openedOnce = true;
+    
+    // 1. เริ่มเพลงทันที (Loop ไปเรื่อยๆ)
+    song.play().catch(err => {
+        console.log("Browser บล็อกการเล่นอัตโนมัติ กรุณาลองคลิกที่หน้าจออีกครั้ง");
+    });
+    
+    // 2. แสดงตัวควบคุมเสียง
+    audioUI.style.display = 'flex';
+
+    // 3. เลื่อนหน้าเค้กสีเข้มลงมา
+    setTimeout(() => {
+        document.getElementById('cakeSection').classList.add('show');
+    }, 600);
+  }
+}
+
+// ฟังก์ชันเป่าเทียน
+function blowCandle() {
+    const flame = document.querySelector('.flame');
+    flame.style.display = 'none';
+    setTimeout(() => {
+        alert("Happy Birthday! Wishing you so much happiness this year. Thank you for being such a wonderful friend to me. I hope you stay healthy and keep smiling lots.I’m sorry that this gift isn’t as good as it could be, and I wish I could have given you something better.And lastly, I wrote this letter in Thai because I can express my feelings better in my own language than in English. Happy Birthday once again!");
+    }, 400);
+}
+</script>
+
+</body>
+</html>
